@@ -7,10 +7,10 @@ PostgreSQL, доступ выполняется через Entity Framework Core
 В работе добавлены авторизация на основе Session, защищённая страница личного
 кабинета и серверная валидация формы входа.
 
-- **Публичный URL:** <https://wt-lab12-12auth-validation-kobzeva.onrender.com>
 - **GitHub:** <https://github.com/VictoriaKobzeva/wt-lab12-12auth-validation-kobzeva>
 - **Отчёт:** `wt-lab12-kobzeva.pdf` (исходник — `docs/build_report.py`)
 - **Локальная БД:** PostgreSQL 16, `localhost:5432`, база `wt_lab12`, пользователь `postgres`
+- **Публикация:** подготовлен `render.yaml` (Render, Docker)
 
 ## Предметная область
 
@@ -308,8 +308,10 @@ connectionString += $";Search Path={databaseSchema}";
 
 В каталоге есть `render.yaml` — вариант развёртывания через Blueprint: он создаёт
 PostgreSQL и Web Service (Runtime: Docker) и связывает их через `DATABASE_URL`.
+В рамках WT-12 развёртывание на Render не выполнялось: конфигурация подготовлена,
+приложение проверено локально.
 
 ## Ссылки
 
 - GitHub-репозиторий: <https://github.com/VictoriaKobzeva/wt-lab12-12auth-validation-kobzeva>
-- Публичный URL Render: <https://wt-lab12-12auth-validation-kobzeva.onrender.com>
+- Отчёт: `wt-lab12-kobzeva.pdf`

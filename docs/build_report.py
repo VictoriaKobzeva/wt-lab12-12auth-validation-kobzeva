@@ -205,10 +205,6 @@ for _ in range(6):
 
 para("GitHub:", bold=True, align=WD_ALIGN_PARAGRAPH.CENTER, size=12)
 para("https://github.com/VictoriaKobzeva/wt-lab12-12auth-validation-kobzeva",
-     align=WD_ALIGN_PARAGRAPH.CENTER, size=11, color=MID, space_after=8)
-para("Опубликованное приложение:", bold=True,
-     align=WD_ALIGN_PARAGRAPH.CENTER, size=12)
-para("https://wt-lab12-12auth-validation-kobzeva.onrender.com",
      align=WD_ALIGN_PARAGRAPH.CENTER, size=11, color=MID)
 doc.add_page_break()
 
