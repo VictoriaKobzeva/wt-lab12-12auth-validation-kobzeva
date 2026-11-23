@@ -1,0 +1,34 @@
+@page
+@model ProfileModel
+
+@{
+    ViewData["Title"] = "Личный кабинет";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <div class="card shadow-sm rounded-4 border-0">
+                <div class="card-body p-4">
+                    <h1 class="fw-bold mb-4">👤 Личный кабинет</h1>
+
+                    <p class="fs-4">
+                        Пользователь:
+                        <strong>@Model.UserLogin</strong>
+                    </p>
+
+                    <div class="alert alert-success">
+                        Вход выполнен успешно. Эта страница доступна только
+                        авторизованным пользователям.
+                    </div>
+
+                    <form method="post">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            Выйти
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
