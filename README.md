@@ -5,12 +5,14 @@
 Приложение ASP.NET Core Razor Pages для учёта недвижимости. Данные хранятся в
 PostgreSQL, доступ выполняется через Entity Framework Core (Code First, миграции).
 В работе добавлены авторизация на основе Session, защищённая страница личного
-кабинета и серверная валидация формы входа.
+кабинета, избранные объекты недвижимости и валидация формы входа
+(серверная и клиентская).
 
 - **GitHub:** <https://github.com/VictoriaKobzeva/wt-lab12-12auth-validation-kobzeva>
+- **Демо на Render:** <https://wt-lab12-12auth-validation-kobzeva.onrender.com>
 - **Отчёт:** `wt-lab12-kobzeva.pdf` (исходник — `docs/build_report.py`)
 - **Локальная БД:** PostgreSQL 16, `localhost:5432`, база `wt_lab12`, пользователь `postgres`
-- **Публикация:** подготовлен `render.yaml` (Render, Docker)
+- **Публикация:** Render, Docker; конфигурация — `render.yaml`
 
 ## Предметная область
 
@@ -39,6 +41,8 @@ PostgreSQL, доступ выполняется через Entity Framework Core
 | Таблица `Users` | `Data/AppDbContext.cs`, миграция `AddUsers` |
 | Страница входа | `Pages/Login.cshtml`, `Pages/Login.cshtml.cs` |
 | Защищённая страница | `Pages/Profile.cshtml`, `Pages/Profile.cshtml.cs` |
+| Избранное | `Models/Favorite.cs`, миграция `AddFavorites` |
+| Переключатель «в избранное» | `Pages/Products/Index.cshtml`, `Pages/Products/Index.cshtml.cs` |
 | Session | `Program.cs` (`AddSession`, `UseSession`) |
 | Навигация | `Pages/Shared/_Layout.cshtml` |
 
@@ -188,6 +192,32 @@ public IActionResult OnPost()
 }
 ```
 
+## Избранное
+
+Авторизованный пользователь может добавлять объекты в избранное и видеть их в
+личном кабинете.
+
+Модель `Favorite` (`Models/Favorite.cs`):
+
+| Поле | Тип | Назначение |
+|---|---|---|
+| `Id` | `int` | Первичный ключ |
+| `UserId` | `int` | Ссылка на `Users`, каскадное удаление |
+| `PropertyId` | `int` | Ссылка на `Properties`, каскадное удаление |
+| `AddedAt` | `DateTime` | Момент добавления (UTC) |
+
+На паре `(UserId, PropertyId)` стоит уникальный индекс, поэтому один и тот же
+объект нельзя добавить дважды. Добавление и удаление выполняет обработчик
+`OnPostToggleFavoriteAsync` в `Pages/Products/Index.cshtml.cs`; форма карточки
+передаёт `returnUrl`, чтобы вернуть пользователя в каталог.
+
+Если пользователь не авторизован, нажатие на сердечко перенаправляет его на
+`/Login?returnUrl=/Products`, а после входа он возвращается в каталог.
+
+Страница `/Profile` выводит избранные объекты, количество доступных и общую
+стоимость, а также позволяет убрать объект из списка
+(`OnPostRemoveFavoriteAsync`).
+
 ## Валидация
 
 Валидация выполняется на сервере до запроса к PostgreSQL. Атрибуты модели
@@ -242,6 +272,12 @@ public async Task<IActionResult> OnPostAsync()
 | 5. Успешный вход | `student` / `1234` | Переход на `/Profile` |
 | 6. Выход | кнопка «Выйти» | Переход на `/Login` |
 | 7. `/Profile` без входа | прямой переход | Перенаправление на `/Login` |
+
+Дополнительно на `/Login` подключена клиентская валидация: страница выводит
+`_ValidationScriptsPartial` (jQuery Validation + unobtrusive), поэтому те же
+правила срабатывают в браузере ещё до отправки формы. Серверная проверка
+`ModelState` при этом остаётся основной защитой, так как клиентские скрипты
+можно обойти.
 
 ## Миграции
 
@@ -306,12 +342,25 @@ var databaseSchema = builder.Configuration["DATABASE_SCHEMA"];
 connectionString += $";Search Path={databaseSchema}";
 ```
 
-В каталоге есть `render.yaml` — вариант развёртывания через Blueprint: он создаёт
-PostgreSQL и Web Service (Runtime: Docker) и связывает их через `DATABASE_URL`.
-В рамках WT-12 развёртывание на Render не выполнялось: конфигурация подготовлена,
-приложение проверено локально.
+В каталоге есть `render.yaml` с описанием Web Service (Runtime: Docker).
+Приложение развёрнуто на Render:
+
+- **URL:** <https://wt-lab12-12auth-validation-kobzeva.onrender.com>
+- **Dashboard:** <https://dashboard.render.com/web/srv-dc3cih95efls73bh2o6g>
+- **Схема БД:** `wt_lab12` на существующем free-инстансе `wt-lab7-db-kobzeva`
+- **Health check:** `/Login`
+- **Автодеплой:** при push в `main`
+
+Так как новый free-инстанс PostgreSQL на аккаунте создать нельзя, сервис
+использует общую БД с отдельной схемой: `DATABASE_URL` указывает на внутренний
+адрес инстанса, а `DATABASE_SCHEMA=wt_lab12` добавляет `Search Path`. При старте
+контейнер создаёт схему (если её нет) и применяет миграции EF Core.
+
+Free-сервис Render засыпает после простоя, поэтому первый запрос после паузы
+может открываться 30–60 секунд.
 
 ## Ссылки
 
 - GitHub-репозиторий: <https://github.com/VictoriaKobzeva/wt-lab12-12auth-validation-kobzeva>
+- Демо на Render: <https://wt-lab12-12auth-validation-kobzeva.onrender.com>
 - Отчёт: `wt-lab12-kobzeva.pdf`
