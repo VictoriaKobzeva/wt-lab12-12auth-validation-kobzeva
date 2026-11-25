@@ -23,6 +23,8 @@ public class AppDbContext : DbContext
 
     public DbSet<User> Users => Set<User>();
 
+    public DbSet<Favorite> Favorites => Set<Favorite>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -45,6 +47,22 @@ public class AppDbContext : DbContext
                 Login = "student",
                 Password = "1234"
             });
+        });
+
+        modelBuilder.Entity<Favorite>(entity =>
+        {
+            // Один пользователь может добавить объект в избранное только один раз.
+            entity.HasIndex(f => new { f.UserId, f.PropertyId }).IsUnique();
+
+            entity.HasOne(f => f.User)
+                .WithMany()
+                .HasForeignKey(f => f.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(f => f.Property)
+                .WithMany()
+                .HasForeignKey(f => f.PropertyId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Property>(entity =>
